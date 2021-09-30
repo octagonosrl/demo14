@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_reconciliation_report" model="ir.actions.report">
+        <field name="name">Reporte Conciliacion</field>
+        <field name="model">oct.bank.reconciliation</field>
+        <field name="binding_model_id" ref="model_oct_bank_reconciliation"/>
+        <field name="report_type">qweb-pdf</field>
+        <field name="print_report_name">'Conciliación - %s - %s' % (object.date, object.account_id.display_name)</field>
+        <field name="report_name">oct_bank_reconciliation.reconciliation_bank_doc</field>
+        <field name="report_file">oct_bank_reconciliation.reconciliation_bank_doc</field>
+        <field name="binding_type">report</field>
+        <field name="groups_id" eval="[(4, ref('oct_bank_reconciliation.group_oct_bank_reconciliation_user')),
+                                       (4, ref('oct_bank_reconciliation.group_oct_bank_reconciliation_manager'))]"/>
+    </record>
+
+    <template id="reconciliation_bank_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="oct_bank_reconciliation.reconciliation_bank_document"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="reconciliation_bank_document">
+        <!--                      <t t-call="report.external_layout_header"/>-->
+        <!--         -->
+        <t t-call="web.external_layout">
+
+            <div class="page">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Fecha:</strong>
+                        <span t-field="o.date"/>
+                    </div>
+
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <strong>Cuenta:</strong>
+                        <span t-field="o.account_id"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <h3>
+                            <strong>Balance según banco</strong>
+                        </h3>
+                        <div>
+                            <strong>Balance disponible según banco:</strong>
+                            <span t-field="o.current_balance1"/>
+                        </div>
+                        <div>
+                            <strong>Créditos en tránsito:</strong>
+                            <span t-field="o.current_checks1"/>
+                        </div>
+                        <div>
+                            <strong>Débitos en tránsito:</strong>
+                            <span t-field="o.debit_checks1"/>
+                        </div>
+                        <div>
+                            <strong>Balance al corte del mes:</strong>
+                            <span t-field="o.final_balance1"/>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <div>
+                            <h3>
+                                <strong>Balance según libro</strong>
+                            </h3>
+                            <div>
+                                <strong>Balance anterior:</strong>
+                                <span t-field="o.previous_balance"/>
+                            </div>
+                            <div>
+                                <strong>Depositos emitidos:</strong>
+                                <span t-field="o.issued_deposits"/>
+                            </div>
+                            <div>
+                                <strong>Créditos emitidos:</strong>
+                                <span t-field="o.current_checks2"/>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3>
+                                <strong>Resumen</strong>
+                            </h3>
+                            <div>
+                                <strong>Total de conciliación del mes:</strong>
+                                <span t-field="o.total"/>
+                            </div>
+                            <div>
+                                <strong>Diferencia:</strong>
+                                <span t-field="o.difference"/>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <br/>
+
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th width="13%">
+                                <strong>Fecha</strong>
+                            </th>
+                            <th>
+                                <strong>Referencia</strong>
+                            </th>
+                            <th class="text-center">
+                                <strong>Cuenta</strong>
+                            </th>
+                            <th class="text-right">
+                                <strong>Empresa</strong>
+                            </th>
+                            <th class="text-right">
+                                <strong>Debito</strong>
+                            </th>
+                            <th class="text-right">
+                                <strong>Credito</strong>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.payment_ids.filtered(lambda x: not x.bank_reconciliated)" t-as="line">
+                            <td width="13%">
+                                <span t-field="line.date"/>
+                            </td>
+                            <td>
+                                <span t-field="line.ref"/>
+                            </td>
+                            <td class="text-center">
+                                <span t-field="line.account_id"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="line.partner_id"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="line.debit"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="line.credit"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+        </t>
+    </template>
+
+
+</odoo>
+
